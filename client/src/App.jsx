@@ -1,29 +1,33 @@
 import { useState } from 'react'
-import PasswordInput from './components/PasswordInput'
+import RoleCard from './components/RoleCard'
 
 export default function App() {
-  const [password, setPassword] = useState('')
-  const [confirm, setConfirm] = useState('')
+  const [role, setRole] = useState('actor')
 
   return (
-    <div style={{ padding: 32, display: 'grid', gap: 20, maxWidth: 400 }}>
-      <h1 style={{ fontSize: 40 }}>Password</h1>
+    <div style={{ padding: 32, maxWidth: 560 }}>
+      <h1 style={{ fontSize: 40, marginBottom: 16 }}>Role</h1>
 
-      <PasswordInput
-        label="Password"
-        placeholder="Enter password"
-        showStrength
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      <div
+        role="radiogroup"
+        aria-label="Choose your role"
+        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}
+      >
+        <RoleCard
+          title="Actor"
+          description="Find and apply for casting calls"
+          selected={role === 'actor'}
+          onSelect={() => setRole('actor')}
+        />
+        <RoleCard
+          title="Director"
+          description="Post casting calls and review actors"
+          selected={role === 'director'}
+          onSelect={() => setRole('director')}
+        />
+      </div>
 
-      <PasswordInput
-        label="Confirm password"
-        placeholder="Re-enter password"
-        value={confirm}
-        onChange={(e) => setConfirm(e.target.value)}
-        error={confirm && confirm !== password ? 'Passwords do not match' : ''}
-      />
+      <p style={{ marginTop: 16 }}>Selected role: {role}</p>
     </div>
   )
 }

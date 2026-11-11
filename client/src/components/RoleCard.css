@@ -1,0 +1,50 @@
+.role-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 16px;
+  text-align: left;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.role-card:hover {
+  border-color: var(--navy);
+}
+
+.role-card:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.role-card-selected {
+  border: 2px solid var(--navy);
+  padding: 15px; /* keeps the size the same with the thicker border */
+  background: #fcf8f4;
+}
+
+.role-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.role-card-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.role-card-mark {
+  display: flex;
+}
+
+.role-card-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
