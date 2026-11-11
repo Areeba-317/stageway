@@ -1,22 +1,19 @@
+import { signup } from './services/api'
+
 export default function App() {
+  const test = async () => {
+    try {
+      const result = await signup({ email: 'taken@test.com', phone: '3001234567' })
+      console.log('Success:', result)
+    } catch (err) {
+      console.log('Error:', err.response.data.message)
+    }
+  }
+
   return (
     <div style={{ padding: 32 }}>
       <h1 style={{ fontSize: 40 }}>StageWay</h1>
-      <p>Find your next role. Discover your next star.</p>
-      <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-        {['navy', 'crimson', 'gold', 'ivory', 'obsidian'].map((c) => (
-          <div
-            key={c}
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 12,
-              background: `var(--${c})`,
-              border: '1px solid var(--border)',
-            }}
-          />
-        ))}
-      </div>
+      <button onClick={test}>Test signup</button>
     </div>
   )
 }
