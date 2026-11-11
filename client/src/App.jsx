@@ -1,33 +1,13 @@
-import { useState } from 'react'
-import RoleCard from './components/RoleCard'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import SignUp from './pages/SignUp'
 
 export default function App() {
-  const [role, setRole] = useState('actor')
-
   return (
-    <div style={{ padding: 32, maxWidth: 560 }}>
-      <h1 style={{ fontSize: 40, marginBottom: 16 }}>Role</h1>
-
-      <div
-        role="radiogroup"
-        aria-label="Choose your role"
-        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}
-      >
-        <RoleCard
-          title="Actor"
-          description="Find and apply for casting calls"
-          selected={role === 'actor'}
-          onSelect={() => setRole('actor')}
-        />
-        <RoleCard
-          title="Director"
-          description="Post casting calls and review actors"
-          selected={role === 'director'}
-          onSelect={() => setRole('director')}
-        />
-      </div>
-
-      <p style={{ marginTop: 16 }}>Selected role: {role}</p>
-    </div>
+    <Routes>
+      <Route path="/" element={<Navigate to="/signup" replace />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/login" element={<p style={{ padding: 32 }}>Login page (coming soon)</p>} />
+      <Route path="/verify-otp" element={<p style={{ padding: 32 }}>OTP page (coming soon)</p>} />
+    </Routes>
   )
 }
