@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 // Must match the roles on the frontend RoleCards. Ask Areeba and edit this list.
-const ROLES = ['performer', 'organizer', 'audience'];
+const ROLES = ['actor', 'director'];
 
 const userSchema = new mongoose.Schema({
      fullName: { type: String, required: true, trim: true },

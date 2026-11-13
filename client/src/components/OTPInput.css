@@ -1,0 +1,25 @@
+.otp {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  max-width: 420px;
+}
+.otp-box {
+  height: 56px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--navy);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+  min-width: 0;
+}
+.otp-box:focus {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(10, 29, 75, 0.15);
+}
+.otp-box-error {
+  border-color: var(--error);
+}

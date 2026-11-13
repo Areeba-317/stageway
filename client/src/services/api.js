@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 // Flip to false when the real backend is ready
-const USE_MOCK = true
-const BASE_URL = 'http://localhost:5000/api/auth'
+const USE_MOCK = false
+const BASE_URL = 'http://localhost:5001/api/auth'
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -60,14 +60,31 @@ async function mockLogin({ identifier, password }) {
 const http = axios.create({ baseURL: BASE_URL })
 const real = (path, data) => http.post(path, data).then((res) => res.data)
 
-export const signup = (data) =>
-  USE_MOCK ? mockSignup(data) : real('/signup', data)
+export const signup = async (data) => {
+  if (USE_MOCK) return mockSignup(data)
+  const res = await real('/signup', data)
+  const userId = res.userId || res.id || res._id || res.user?._id || res.user?.id
+  return { ...res, userId, phone: res.phone || `+92${data.phone}` }
+}
 
-export const verifyOtp = (data) =>
-  USE_MOCK ? mockVerifyOtp(data) : real('/verify-otp', data)
+export const verifyOtp = ({ userId, code }) =>
+  USE_MOCK
+    ? mockVerifyOtp({ code })
+    : real('/verify-otp', { userId, id: userId, code, otp: code })
 
-export const resendOtp = (data) =>
-  USE_MOCK ? mockResendOtp(data) : real('/resend-otp', data)
+export const resendOtp = ({ userId }) =>
+  USE_MOCK ? mockResendOtp() : real('/resend-otp', { userId, id: userId })
 
-export const login = (data) =>
-  USE_MOCK ? mockLogin(data) : real('/login', data)
+export const login = async ({ identifier, password }) => {
+  if (USE_MOCK) return mockLogin({ identifier, password })
+  const res = await real('/login', { email: identifier, identifier, password })
+  const u = res.user || {}
+  return {
+    token: res.token,
+    user: {
+      id: u.id || u._id,
+      fullName: u.fullName || u.name,
+      role: String(u.role || '').toLowerCase(),
+    },
+  }
+}
