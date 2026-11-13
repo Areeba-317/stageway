@@ -92,18 +92,26 @@ exports.resendOtp = async (req, res) => {
      res.json(body);
 };
 
-// POST /api/auth/login   body: { email, password }
+// POST /api/auth/login   body: { identifier, password }  (identifier = email or phone)
 exports.login = async (req, res) => {
-     const { email, password } = req.body;
-     if (typeof email !== 'string' || typeof password !== 'string' || !email || !password)
-          return res.status(400).json({ message: 'Email and password are required' });
+     const { identifier, email, phone, password } = req.body;
+     const id = String(identifier || email || phone || '').trim();
+     if (!id || typeof password !== 'string' || !password)
+          return res.status(400).json({ message: 'Email or phone and password are required' });
 
-     const user = await User.findOne({ email: email.trim().toLowerCase() }).select('+passwordHash');
+     const query = id.includes('@')
+          ? { email: id.toLowerCase() }
+          : { phone: id.replace(/[\s-]/g, '') };
+
+     const user = await User.findOne(query).select('+passwordHash');
      const ok = user && (await bcrypt.compare(password, user.passwordHash));
-     if (!ok) return res.status(401).json({ message: 'Invalid email or password' });
+     if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
 
      if (!user.isVerified)
           return res.status(403).json({ message: 'Please verify your phone first', userId: user._id });
 
      res.json({ message: 'Login successful', token: signToken(user), user: publicUser(user) });
 };
+
+// GET /api/auth/me   (needs a token)
+exports.me = async (req, res) => res.json({ user: publicUser(req.user) });
