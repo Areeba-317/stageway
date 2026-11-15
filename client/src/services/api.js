@@ -88,3 +88,20 @@ export const login = async ({ identifier, password }) => {
     },
   }
 }
+
+// ---- Vacancies (real backend) ----
+const VAC_URL = 'http://localhost:5001/api/vacancies'
+const vac = axios.create({ baseURL: VAC_URL })
+vac.interceptors.request.use((config) => {
+  const token = localStorage.getItem('sw_token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+const toList = (d) => (Array.isArray(d) ? d : d?.vacancies || d?.data || d?.items || [])
+
+export const createVacancy = (data) => vac.post('/', data).then((r) => r.data)
+export const getMyVacancies = () => vac.get('/mine').then((r) => toList(r.data))
+export const updateVacancy = (id, data) => vac.put(`/${id}`, data).then((r) => r.data)
+export const closeVacancy = (id) => vac.patch(`/${id}/close`).then((r) => r.data)
+export const getVacancies = (params) =>
+  vac.get('/', { params }).then((r) => ({ items: toList(r.data), raw: r.data }))

@@ -1,0 +1,47 @@
+.vform {
+  display: grid;
+  gap: 20px;
+  background: var(--white);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 8px 30px rgba(10, 29, 75, 0.08);
+  max-width: 760px;
+}
+.vform-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.textarea,
+.select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--text);
+  font-size: 16px;
+  outline: none;
+}
+.select {
+  height: 48px;
+}
+.textarea {
+  resize: vertical;
+}
+.textarea:focus,
+.select:focus {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(10, 29, 75, 0.15);
+}
+.textarea-error {
+  border-color: var(--error);
+}
+@media (max-width: 600px) {
+  .vform {
+    padding: 20px;
+  }
+  .vform-row {
+    grid-template-columns: 1fr;
+  }
+}

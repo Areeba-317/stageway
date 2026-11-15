@@ -3,29 +3,11 @@ import SignUp from './pages/SignUp'
 import VerifyOtp from './pages/VerifyOtp'
 import Login from './pages/Login'
 import Placeholder from './pages/Placeholder'
+import MyVacancies from './pages/MyVacancies'
+import PostVacancy from './pages/PostVacancy'
 import ProtectedRoute from './components/ProtectedRoute'
 
-const actor = (path, title) => (
-  <Route
-    path={path}
-    element={
-      <ProtectedRoute role="actor">
-        <Placeholder title={title} />
-      </ProtectedRoute>
-    }
-  />
-)
-
-const director = (path, title) => (
-  <Route
-    path={path}
-    element={
-      <ProtectedRoute role="director">
-        <Placeholder title={title} />
-      </ProtectedRoute>
-    }
-  />
-)
+const guard = (role, element) => <ProtectedRoute role={role}>{element}</ProtectedRoute>
 
 export default function App() {
   return (
@@ -35,10 +17,10 @@ export default function App() {
       <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/login" element={<Login />} />
 
-      {actor('/actor', 'Browse Vacancies')}
-      {actor('/actor/portfolio', 'My Portfolio')}
-      {director('/director', 'My Vacancies')}
-      {director('/director/post', 'Post Vacancy')}
+      <Route path="/actor" element={guard('actor', <Placeholder title="Browse Vacancies" />)} />
+      <Route path="/actor/portfolio" element={guard('actor', <Placeholder title="My Portfolio" />)} />
+      <Route path="/director" element={guard('director', <MyVacancies />)} />
+      <Route path="/director/post" element={guard('director', <PostVacancy />)} />
 
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
