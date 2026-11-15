@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const a = require('../controllers/applicationController');
 const c = require('../controllers/vacancyController');
 const { protect, requireRole } = require('../middleware/auth');
 
@@ -11,5 +12,7 @@ router.get('/mine', director, wrap(c.mine));      // keep above /:id
 router.get('/:id', protect, wrap(c.getOne));
 router.put('/:id', director, wrap(c.update));
 router.patch('/:id/close', director, wrap(c.close));
+router.post('/:id/apply', protect, requireRole('actor'), wrap(a.apply));
+router.get('/:id/applicants', director, wrap(a.applicants));
 
 module.exports = router;

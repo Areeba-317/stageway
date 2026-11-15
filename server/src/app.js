@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const authRoutes = require('./routes/authRoutes');
 const vacancyRoutes = require('./routes/vacancyRoutes');
 const portfolioRoutes = require('./routes/portfolioRoutes');
+const applicationRoutes = require('./routes/applicationRoutes');
 const { UPLOAD_DIR } = require('./middleware/upload');
 
 const app = express();
@@ -22,6 +23,7 @@ app.get('/api/health', (req, res) =>
 app.use('/api/auth', authRoutes);
 app.use('/api/vacancies', vacancyRoutes);
 app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/applications', applicationRoutes);
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
 

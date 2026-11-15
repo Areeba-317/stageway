@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Vacancy = require('../models/Vacancy');
+const Application = require('../models/Application');
 
 const FIELDS = ['title', 'description', 'roleType', 'gender', 'ageMin', 'ageMax',
      'tone', 'location', 'compensation', 'deadline'];
@@ -137,6 +138,15 @@ exports.listOpen = async (req, res) => {
                .limit(limit)
                .lean(),
      ]);
+
+     // Tell actors which vacancies they already applied to
+     if (req.user.role === 'actor' && vacancies.length) {
+          const mine = await Application.find({
+               actor: req.user._id, vacancy: { $in: vacancies.map((x) => x._id) },
+          }).select('vacancy').lean();
+          const applied = new Set(mine.map((x) => String(x.vacancy)));
+          vacancies.forEach((x) => { x.applied = applied.has(String(x._id)); });
+     }
 
      res.json({ vacancies, page, limit, total, totalPages: Math.ceil(total / limit) });
 };
