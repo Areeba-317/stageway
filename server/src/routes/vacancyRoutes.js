@@ -7,7 +7,8 @@ const director = [protect, requireRole('director')];
 
 router.get('/', protect, wrap(c.listOpen));
 router.post('/', director, wrap(c.create));
-router.get('/mine', director, wrap(c.mine));        // keep above the /:id routes
+router.get('/mine', director, wrap(c.mine));      // keep above /:id
+router.get('/:id', protect, wrap(c.getOne));
 router.put('/:id', director, wrap(c.update));
 router.patch('/:id/close', director, wrap(c.close));
 
