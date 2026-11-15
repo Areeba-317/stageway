@@ -1,0 +1,18 @@
+const router = require('express').Router();
+const c = require('../controllers/portfolioController');
+const { protect, requireRole } = require('../middleware/auth');
+const { upload } = require('../middleware/upload');
+
+const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+const actor = [protect, requireRole('actor')];
+
+router.get('/me', actor, wrap(c.getMine));
+router.post('/', actor, wrap(c.create));
+router.put('/', actor, wrap(c.update));
+router.delete('/', actor, wrap(c.remove));
+// Auth runs before the upload, so strangers can't fill the disk
+router.post('/videos', actor, upload.single('video'), wrap(c.addVideo));
+router.delete('/videos/:videoId', actor, wrap(c.removeVideo));
+router.get('/:userId', protect, requireRole('director'), wrap(c.getByUser)); // keep last
+
+module.exports = router;
