@@ -1,0 +1,83 @@
+.bv-sub { margin: 4px 0 24px; color: var(--text-muted); }
+.bv-toolbar {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: center;
+  background: var(--white);
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(10, 29, 75, 0.07);
+  margin-bottom: 24px;
+}
+.bv-input {
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--text);
+  font-size: 16px;
+  min-width: 0;
+  outline: none;
+}
+.bv-input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(10, 29, 75, 0.15); }
+.bv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.bv-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(10, 29, 75, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bv-title { font-size: 26px; }
+.bv-meta { margin: 0; font-size: 14px; color: var(--text-muted); }
+.bv-desc {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.bv-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.chip {
+  background: #f7ebe0;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+.bv-foot {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.bv-comp { font-size: 14px; color: var(--text-muted); }
+.bv-empty { background: var(--white); border-radius: 16px; padding: 40px; text-align: center; display: grid; gap: 16px; justify-items: center; }
+.bv-pages { display: flex; justify-content: center; gap: 8px; margin-top: 28px; flex-wrap: wrap; }
+.pg {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+}
+.pg-on { background: var(--navy); color: var(--ivory); }
+.pg:disabled { opacity: 0.5; cursor: not-allowed; }
+@media (max-width: 900px) {
+  .bv-toolbar { grid-template-columns: 1fr 1fr; }
+  .bv-search { grid-column: 1 / -1; }
+  .bv-grid { grid-template-columns: 1fr; }
+}

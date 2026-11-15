@@ -6,6 +6,7 @@ import Placeholder from './pages/Placeholder'
 import MyVacancies from './pages/MyVacancies'
 import PostVacancy from './pages/PostVacancy'
 import ProtectedRoute from './components/ProtectedRoute'
+import BrowseVacancies from './pages/BrowseVacancies'
 
 const guard = (role, element) => <ProtectedRoute role={role}>{element}</ProtectedRoute>
 
@@ -17,7 +18,8 @@ export default function App() {
       <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/login" element={<Login />} />
 
-      <Route path="/actor" element={guard('actor', <Placeholder title="Browse Vacancies" />)} />
+      <Route path="/actor" element={guard('actor', <BrowseVacancies />)} />
+      <Route path="/actor/vacancy/:id" element={guard('actor', <Placeholder title="Vacancy details and apply" />)} />
       <Route path="/actor/portfolio" element={guard('actor', <Placeholder title="My Portfolio" />)} />
       <Route path="/director" element={guard('director', <MyVacancies />)} />
       <Route path="/director/post" element={guard('director', <PostVacancy />)} />
