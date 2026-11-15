@@ -19,9 +19,10 @@ export default function PostVacancy() {
 
   return (
     <AppLayout>
-      <h1 style={{ fontSize: 36, marginBottom: 20 }}>
+      <h1 style={{ fontSize: 36, marginBottom: 0 }}>
         {editing ? 'Edit casting call' : 'Post a casting call'}
       </h1>
+      <p className="page-sub">Publish an audition call for actors across Urdu theatre and television.</p>
       <VacancyForm
         key={id || 'new'}
         initial={editing}

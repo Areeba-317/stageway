@@ -1,0 +1,17 @@
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 40px;
+  background: var(--navy);
+  color: rgba(247, 235, 224, 0.8);
+  font-size: 14px;
+}
+.footer-logo {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--gold);
+}

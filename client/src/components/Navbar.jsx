@@ -21,7 +21,7 @@ export default function Navbar() {
     signOut()
     navigate('/login', { replace: true })
   }
-
+const initials = (user.fullName || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
   return (
     <header className="nav">
       <span className="nav-logo">StageWay</span>
@@ -33,10 +33,9 @@ export default function Navbar() {
         ))}
       </nav>
       <div className="nav-user">
+        <span className="nav-avatar">{initials}</span>
         <span>{user.fullName}</span>
-        <button className="link-btn" onClick={handleLogout}>
-          Log out
-        </button>
+        <button className="link-btn" onClick={handleLogout}>Log out</button>
       </div>
     </header>
   )

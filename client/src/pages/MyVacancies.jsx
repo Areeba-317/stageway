@@ -42,7 +42,10 @@ export default function MyVacancies() {
   return (
     <AppLayout>
       <div className="mv-head">
+        <div>
         <h1 style={{ fontSize: 36 }}>My vacancies</h1>
+        <p className="page-sub" style={{ marginBottom: 0 }}>Review, revise, and close your active casting calls.</p>
+        </div>
         <Button onClick={() => navigate('/director/post')}>Post a vacancy</Button>
       </div>
 
