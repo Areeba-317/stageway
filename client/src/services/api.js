@@ -105,3 +105,66 @@ export const updateVacancy = (id, data) => vac.put(`/${id}`, data).then((r) => r
 export const closeVacancy = (id) => vac.patch(`/${id}/close`).then((r) => r.data)
 export const getVacancies = (params) =>
   vac.get('/', { params }).then((r) => ({ items: toList(r.data), raw: r.data }))
+
+// ---- Portfolio and applications ----
+const MOCK_PORTFOLIO = true // set to false when Rafay's endpoints are ready
+const MOCK_APPLY = true // same for applications
+
+const api = axios.create({ baseURL: 'http://localhost:5001/api' })
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('sw_token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+export const fileUrl = (u) =>
+  !u || u.startsWith('http') || u.startsWith('blob:') ? u : `http://localhost:5001${u}`
+
+let mockPortfolio = { bio: '', age: '', languages: [], skills: [], videos: [] }
+const unwrap = (r) => r.data.portfolio || r.data
+
+export const getPortfolio = async () => {
+  if (MOCK_PORTFOLIO) { await wait(400); return { ...mockPortfolio } }
+  return unwrap(await api.get('/portfolio/me'))
+}
+
+export const savePortfolio = async (data) => {
+  if (MOCK_PORTFOLIO) {
+    await wait(500)
+    mockPortfolio = { ...mockPortfolio, ...data }
+    return { ...mockPortfolio }
+  }
+  return unwrap(await api.put('/portfolio/me', data))
+}
+
+export const uploadVideo = async (file) => {
+  if (MOCK_PORTFOLIO) {
+    await wait(900)
+    const video = { _id: String(Date.now()), url: URL.createObjectURL(file), name: file.name }
+    mockPortfolio = { ...mockPortfolio, videos: [...mockPortfolio.videos, video] }
+    return { ...mockPortfolio }
+  }
+  const body = new FormData()
+  body.append('video', file)
+  return unwrap(await api.post('/portfolio/me/videos', body))
+}
+
+export const deleteVideo = async (videoId) => {
+  if (MOCK_PORTFOLIO) {
+    await wait(300)
+    mockPortfolio = { ...mockPortfolio, videos: mockPortfolio.videos.filter((v) => v._id !== videoId) }
+    return { ...mockPortfolio }
+  }
+  return unwrap(await api.delete(`/portfolio/me/videos/${videoId}`))
+}
+
+const mockApplied = new Set()
+export const applyToVacancy = async ({ vacancyId, note }) => {
+  if (MOCK_APPLY) {
+    await wait(600)
+    if (mockApplied.has(vacancyId)) throw fail(409, 'You have already applied to this casting call')
+    mockApplied.add(vacancyId)
+    return { message: 'Application sent' }
+  }
+  return (await api.post('/applications', { vacancyId, note })).data
+}

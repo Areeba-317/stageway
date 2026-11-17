@@ -1,0 +1,11 @@
+.vd { display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; margin-top: 16px; align-items: start; }
+.vd-main, .vd-apply {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 8px 30px rgba(10, 29, 75, 0.08);
+}
+.vd-apply { display: grid; gap: 16px; }
+.vd-meta { margin: 8px 0; color: var(--text-muted); font-size: 15px; }
+.vd-desc { margin: 20px 0; white-space: pre-wrap; }
+@media (max-width: 900px) { .vd { grid-template-columns: 1fr; } }
