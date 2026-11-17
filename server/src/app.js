@@ -6,12 +6,10 @@ const authRoutes = require('./routes/authRoutes');
 const vacancyRoutes = require('./routes/vacancyRoutes');
 const portfolioRoutes = require('./routes/portfolioRoutes');
 const applicationRoutes = require('./routes/applicationRoutes');
-const { UPLOAD_DIR } = require('./middleware/upload');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(UPLOAD_DIR));
 
 app.get('/api/health', (req, res) =>
      res.json({

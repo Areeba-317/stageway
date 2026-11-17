@@ -1,16 +1,22 @@
-const fs = require('fs');
-const path = require('path');
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 const Portfolio = require('../models/Portfolio');
-const { UPLOAD_DIR, MAX_SIZE } = require('../middleware/upload');
+const { TYPES } = require('../middleware/upload');
+const r2 = require('../services/r2');
 
 const MAX_VIDEOS = 3;
 const MAX_SECONDS = 90;
 
-const removeFile = (filename) =>
-     fs.promises.unlink(path.join(UPLOAD_DIR, path.basename(filename))).catch(() => { });
+// The exact shape from the contract
+const shape = (p) => ({
+     bio: p.bio || '',
+     age: p.age ?? null,
+     languages: p.languages || [],
+     skills: p.skills || [],
+     videos: (p.videos || []).map((v) => ({ _id: v._id, url: v.url, name: v.name })),
+});
+const EMPTY = { bio: '', age: null, languages: [], skills: [], videos: [] };
 
-// Accepts an array or a comma-separated string
 function cleanList(v, maxItems, label) {
      const arr = Array.isArray(v) ? v : typeof v === 'string' ? v.split(',') : null;
      if (!arr) return { error: `${label} must be a list` };
@@ -20,127 +26,113 @@ function cleanList(v, maxItems, label) {
      return { value: out };
 }
 
-function parse(body, partial) {
-     const data = {};
-     if (!partial || body.name !== undefined) {
-          if (typeof body.name !== 'string' || !body.name.trim() || body.name.trim().length > 80)
-               return { error: 'Name is required (max 80 characters)' };
-          data.name = body.name.trim();
-     }
-     if (!partial || body.age !== undefined) {
-          const age = Number(body.age);
-          if (!Number.isInteger(age) || age < 16 || age > 100)
-               return { error: 'Age must be a whole number between 16 and 100' };
-          data.age = age;
-     }
-     if (body.bio !== undefined) {
-          if (typeof body.bio !== 'string' || body.bio.length > 1000)
-               return { error: 'Bio must be text of 1000 characters or fewer' };
-          data.bio = body.bio.trim();
-     }
-     if (body.languages !== undefined) {
-          const r = cleanList(body.languages, 10, 'Languages');
-          if (r.error) return r;
-          data.languages = r.value;
-     }
-     if (body.skills !== undefined) {
-          const r = cleanList(body.skills, 20, 'Skills');
-          if (r.error) return r;
-          data.skills = r.value;
-     }
-     return { data };
-}
-
-// GET /api/portfolio/me
+// GET /api/portfolio/me  (an empty portfolio if none saved yet)
 exports.getMine = async (req, res) => {
-     const portfolio = await Portfolio.findOne({ user: req.user._id });
-     if (!portfolio) return res.status(404).json({ message: 'You have not created a portfolio yet' });
-     res.json({ portfolio });
+     const p = await Portfolio.findOne({ user: req.user._id });
+     res.json({ portfolio: p ? shape(p) : EMPTY });
 };
 
-// POST /api/portfolio
-exports.create = async (req, res) => {
-     const { data, error } = parse(req.body, false);
-     if (error) return res.status(400).json({ message: error });
-     if (await Portfolio.exists({ user: req.user._id }))
-          return res.status(409).json({ message: 'You already have a portfolio. Edit it instead.' });
-     const portfolio = await Portfolio.create({ ...data, user: req.user._id });
-     res.status(201).json({ message: 'Portfolio created', portfolio });
-};
-
-// PUT /api/portfolio
+// PUT /api/portfolio/me   body { bio, age, languages[], skills[], name? }
+// Creates the portfolio the first time (age is required then)
 exports.update = async (req, res) => {
-     const portfolio = await Portfolio.findOne({ user: req.user._id });
-     if (!portfolio) return res.status(404).json({ message: 'Create your portfolio first' });
-     const { data, error } = parse(req.body, true);
-     if (error) return res.status(400).json({ message: error });
-     Object.assign(portfolio, data);
-     await portfolio.save();
-     res.json({ message: 'Portfolio updated', portfolio });
+     const { name, bio, age, languages, skills } = req.body;
+     const p = (await Portfolio.findOne({ user: req.user._id }))
+          || new Portfolio({ user: req.user._id, name: req.user.fullName });
+
+     if (name !== undefined) {
+          if (typeof name !== 'string' || !name.trim() || name.trim().length > 80)
+               return res.status(400).json({ message: 'Name is required (max 80 characters)' });
+          p.name = name.trim();
+     }
+     if (bio !== undefined) {
+          if (typeof bio !== 'string' || bio.length > 1000)
+               return res.status(400).json({ message: 'Bio must be text of 1000 characters or fewer' });
+          p.bio = bio.trim();
+     }
+     if (age !== undefined && age !== null && age !== '') {
+          const n = Number(age);
+          if (!Number.isInteger(n) || n < 16 || n > 100)
+               return res.status(400).json({ message: 'Age must be a whole number between 16 and 100' });
+          p.age = n;
+     }
+     if (languages !== undefined) {
+          const r = cleanList(languages, 10, 'Languages');
+          if (r.error) return res.status(400).json({ message: r.error });
+          p.languages = r.value;
+     }
+     if (skills !== undefined) {
+          const r = cleanList(skills, 20, 'Skills');
+          if (r.error) return res.status(400).json({ message: r.error });
+          p.skills = r.value;
+     }
+
+     if (p.age == null)
+          return res.status(400).json({ message: 'Age is required' });
+
+     await p.save();
+     res.json({ portfolio: shape(p) });
 };
 
-// DELETE /api/portfolio
-exports.remove = async (req, res) => {
-     const portfolio = await Portfolio.findOne({ user: req.user._id });
-     if (!portfolio) return res.status(404).json({ message: 'No portfolio to delete' });
-     await Promise.all(portfolio.videos.map((v) => removeFile(v.filename)));
-     await portfolio.deleteOne();
-     res.json({ message: 'Portfolio deleted' });
-};
-
-// POST /api/portfolio/videos   (multipart/form-data, field name "video")
+// POST /api/portfolio/me/videos   multipart field "video"
 exports.addVideo = async (req, res) => {
      const file = req.file;
      if (!file) return res.status(400).json({ message: 'No video received. Send it in the "video" field.' });
-     const reject = async (status, message) => { await removeFile(file.filename); return res.status(status).json({ message }); };
 
-     const portfolio = await Portfolio.findOne({ user: req.user._id });
-     if (!portfolio) return reject(400, 'Create your portfolio before uploading videos');
-     if (portfolio.videos.length >= MAX_VIDEOS)
-          return reject(400, `You can upload at most ${MAX_VIDEOS} videos. Delete one first.`);
+     const p = await Portfolio.findOne({ user: req.user._id });
+     if (!p)
+          return res.status(400).json({ message: 'Save your profile (with your age) before uploading videos' });
+     if (p.videos.length >= MAX_VIDEOS)
+          return res.status(400).json({ message: `You can upload at most ${MAX_VIDEOS} videos. Delete one first.` });
 
      // Read the real length from the file itself (also rejects fake or corrupt files)
      let duration;
      try {
-          const { parseFile } = await import('music-metadata');
-          const meta = await parseFile(file.path, { duration: true });
+          const { parseBuffer } = await import('music-metadata');
+          const meta = await parseBuffer(file.buffer, { mimeType: file.mimetype }, { duration: true });
           duration = meta.format.duration;
      } catch {
-          return reject(400, 'Could not read this video. The file may be corrupt.');
+          return res.status(400).json({ message: 'Could not read this video. The file may be corrupt.' });
      }
-     if (!duration) return reject(400, 'Could not read the video length');
-     if (duration > MAX_SECONDS) return reject(400, `Video must be ${MAX_SECONDS} seconds or shorter`);
+     if (!duration) return res.status(400).json({ message: 'Could not read the video length' });
+     if (duration > MAX_SECONDS)
+          return res.status(400).json({ message: `Video must be ${MAX_SECONDS} seconds or shorter` });
 
-     portfolio.videos.push({
-          url: `/uploads/${file.filename}`,
-          filename: file.filename,
-          mimetype: file.mimetype,
-          size: file.size,
-          duration: Math.round(duration * 10) / 10,
-     });
-     await portfolio.save();
-     res.status(201).json({ message: 'Video uploaded', video: portfolio.videos[portfolio.videos.length - 1] });
+     const key = `portfolios/${req.user._id}/${crypto.randomBytes(16).toString('hex')}${TYPES[file.mimetype]}`;
+     const url = await r2.uploadVideo(key, file.buffer, file.mimetype);
+
+     try {
+          p.videos.push({
+               url, key, name: file.originalname.slice(0, 100),
+               mimetype: file.mimetype, size: file.size, duration: Math.round(duration * 10) / 10,
+          });
+          await p.save();
+     } catch (err) {
+          await r2.deleteVideo(key).catch(() => { }); // don't leave an orphan file in R2
+          throw err;
+     }
+     res.status(201).json({ portfolio: shape(p) });
 };
 
-// DELETE /api/portfolio/videos/:videoId
+// DELETE /api/portfolio/me/videos/:videoId
 exports.removeVideo = async (req, res) => {
-     const portfolio = await Portfolio.findOne({ user: req.user._id });
-     const video = portfolio && mongoose.isValidObjectId(req.params.videoId)
-          ? portfolio.videos.id(req.params.videoId) : null;
+     const p = await Portfolio.findOne({ user: req.user._id });
+     const video = p && mongoose.isValidObjectId(req.params.videoId) ? p.videos.id(req.params.videoId) : null;
      if (!video) return res.status(404).json({ message: 'Video not found' });
-     await removeFile(video.filename);
-     portfolio.videos.pull(req.params.videoId);
-     await portfolio.save();
-     res.json({ message: 'Video deleted' });
+
+     await r2.deleteVideo(video.key).catch((e) => console.error('R2 delete failed:', e.message));
+     p.videos.pull(req.params.videoId);
+     await p.save();
+     res.json({ portfolio: shape(p) });
 };
 
 // GET /api/portfolio/:userId   (directors viewing an actor)
 exports.getByUser = async (req, res) => {
      if (!mongoose.isValidObjectId(req.params.userId))
           return res.status(400).json({ message: 'Invalid user id' });
-     const portfolio = await Portfolio.findOne({ user: req.params.userId });
-     if (!portfolio) return res.status(404).json({ message: 'Portfolio not found' });
-     res.json({ portfolio });
+     const p = await Portfolio.findOne({ user: req.params.userId });
+     if (!p) return res.status(404).json({ message: 'Portfolio not found' });
+     res.json({ portfolio: shape(p) });
 };
 
-exports.limits = { MAX_VIDEOS, MAX_SECONDS, MAX_SIZE };
+exports.shape = shape;
+exports.EMPTY = EMPTY;

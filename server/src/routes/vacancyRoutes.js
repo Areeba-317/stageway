@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const a = require('../controllers/applicationController');
 const c = require('../controllers/vacancyController');
+const a = require('../controllers/applicationController');
 const { protect, requireRole } = require('../middleware/auth');
 
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -8,11 +8,10 @@ const director = [protect, requireRole('director')];
 
 router.get('/', protect, wrap(c.listOpen));
 router.post('/', director, wrap(c.create));
-router.get('/mine', director, wrap(c.mine));      // keep above /:id
+router.get('/mine', director, wrap(c.mine));                 // keep above /:id
+router.get('/:id/applications', director, wrap(a.forVacancy));
 router.get('/:id', protect, wrap(c.getOne));
 router.put('/:id', director, wrap(c.update));
 router.patch('/:id/close', director, wrap(c.close));
-router.post('/:id/apply', protect, requireRole('actor'), wrap(a.apply));
-router.get('/:id/applicants', director, wrap(a.applicants));
 
 module.exports = router;
