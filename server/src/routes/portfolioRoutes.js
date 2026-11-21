@@ -8,9 +8,8 @@ const actor = [protect, requireRole('actor')];
 
 router.get('/me', actor, wrap(c.getMine));
 router.put('/me', actor, wrap(c.update));
-// Auth runs before the upload, so strangers can't push files
 router.post('/me/videos', actor, upload.single('video'), wrap(c.addVideo));
 router.delete('/me/videos/:videoId', actor, wrap(c.removeVideo));
-router.get('/:userId', protect, requireRole('director'), wrap(c.getByUser)); // keep last
+router.get('/:userId', protect, requireRole('director'), wrap(c.getByUser));
 
 module.exports = router;

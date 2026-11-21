@@ -5,7 +5,7 @@ const { TYPES } = require('../middleware/upload');
 const r2 = require('../services/r2');
 
 const MAX_VIDEOS = 3;
-const MAX_SECONDS = 90;
+const MAX_SECONDS = 30;
 
 // The exact shape from the contract
 const shape = (p) => ({
