@@ -5,8 +5,9 @@ import Button from '../components/Button'
 import { getPortfolio, savePortfolio, uploadVideo, deleteVideo, fileUrl } from '../services/api'
 import './Portfolio.css'
 
-const MAX_MB = 100
+const MAX_MB = 50
 const MAX_SECONDS = 30
+const MAX_VIDEOS = 3
 const TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
 
 const toList = (s) => s.split(',').map((x) => x.trim()).filter(Boolean)
@@ -33,6 +34,7 @@ export default function Portfolio() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [videoError, setVideoError] = useState('')
+  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     getPortfolio()
@@ -44,6 +46,7 @@ export default function Portfolio() {
           skills: (p.skills || []).join(', '),
         })
         setVideos(p.videos || [])
+        setSaved(p.age != null && p.age !== '')
       })
       .catch((err) => setError(err.response?.data?.message || 'Could not load your portfolio.'))
       .finally(() => setLoading(false))
@@ -51,9 +54,12 @@ export default function Portfolio() {
 
   const errors = {}
   const age = Number(form.age)
-  if (form.age === '' || Number.isNaN(age) || age < 5 || age > 100) errors.age = 'Enter a valid age'
-  if (toList(form.languages).length === 0) errors.languages = 'Add at least one language'
-  if (form.bio.length > 500) errors.bio = 'Keep your bio under 500 characters'
+  const langs = toList(form.languages)
+  if (form.age === '' || Number.isNaN(age) || age < 16 || age > 100) errors.age = 'Enter an age from 16 to 100'
+  if (langs.length === 0) errors.languages = 'Add at least one language'
+  else if (langs.length > 10 || langs.some((x) => x.length > 40))
+    errors.languages = 'Use up to 10 languages, each under 40 characters'
+  if (form.bio.length > 1000) errors.bio = 'Keep your bio under 1000 characters'
   const show = (f) => (touched[f] ? errors[f] : '')
   const blur = (f) => () => setTouched((t) => ({ ...t, [f]: true }))
   const update = (f) => (e) => setForm((p) => ({ ...p, [f]: e.target.value }))
@@ -72,6 +78,7 @@ export default function Portfolio() {
         languages: toList(form.languages),
         skills: toList(form.skills),
       })
+      setSaved(true)
       setMessage('Portfolio saved.')
     } catch (err) {
       setError(err.response?.data?.message || 'Could not save your portfolio.')
@@ -85,6 +92,8 @@ export default function Portfolio() {
     e.target.value = ''
     if (!file) return
     setVideoError('')
+    if (!saved) return setVideoError('Save your profile first, then upload a video.')
+    if (videos.length >= MAX_VIDEOS) return setVideoError('You can upload up to 3 videos. Delete one first.')
     if (!TYPES.includes(file.type)) return setVideoError('Please choose an MP4, MOV or WebM video.')
     if (file.size > MAX_MB * 1024 * 1024) return setVideoError(`The video must be under ${MAX_MB} MB.`)
     const seconds = await readDuration(file)
