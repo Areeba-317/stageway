@@ -20,8 +20,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.12.1",
     "multer": "^2.5.0",
-    "music-metadata": "^12.5.0",
-    "swagger-ui-express": "^5.0.1"
+    "music-metadata": "^12.5.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
