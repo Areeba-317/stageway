@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import BrowseVacancies from './pages/BrowseVacancies'
 import Portfolio from './pages/Portfolio'
 import VacancyDetails from './pages/VacancyDetails'
+import Applicants from './pages/Applicants'
 
 const guard = (role, element) => <ProtectedRoute role={role}>{element}</ProtectedRoute>
 
@@ -22,10 +23,10 @@ export default function App() {
 
       <Route path="/actor" element={guard('actor', <BrowseVacancies />)} />
       <Route path="/actor/portfolio" element={guard('actor', <Portfolio />)} />
-<Route path="/actor/vacancy/:id" element={guard('actor', <VacancyDetails />)} />
+      <Route path="/actor/vacancy/:id" element={guard('actor', <VacancyDetails />)} />
       <Route path="/director" element={guard('director', <MyVacancies />)} />
       <Route path="/director/post" element={guard('director', <PostVacancy />)} />
-
+      <Route path="/director/vacancy/:id/applicants" element={guard('director', <Applicants />)} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )

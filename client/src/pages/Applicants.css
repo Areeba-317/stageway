@@ -1,0 +1,14 @@
+@import './BrowseVacancies.css';
+.ap-list { display: grid; gap: 16px; margin-top: 8px; }
+.ap-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(10, 29, 75, 0.07);
+  display: grid;
+  gap: 10px;
+}
+.ap-meta { margin: 0; font-size: 14px; color: var(--text-muted); }
+.ap-note { margin: 0; padding: 12px; background: #fcf8f4; border-radius: 12px; }
+.ap-videos { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.ap-videos video { width: 100%; max-height: 180px; border-radius: 12px; background: #000; }

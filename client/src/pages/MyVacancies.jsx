@@ -66,6 +66,11 @@ export default function MyVacancies() {
           <article className="mv-card" key={v._id || v.id}>
             <div className="mv-top">
               <h2 className="mv-title">{v.title}</h2>
+              <div className="mv-actions" style={{ marginBottom: 12 }}>
+                <Button variant="secondary" onClick={() => navigate(`/director/vacancy/${v._id || v.id}/applicants`, { state: { title: v.title } })}>
+                  View applicants
+                </Button>
+              </div>
               <span className={`badge ${v.status === 'closed' ? 'badge-closed' : 'badge-open'}`}>
                 {v.status === 'closed' ? 'Closed' : 'Open'}
               </span>

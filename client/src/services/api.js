@@ -103,12 +103,10 @@ export const createVacancy = (data) => vac.post('/', data).then((r) => r.data)
 export const getMyVacancies = () => vac.get('/mine').then((r) => toList(r.data))
 export const updateVacancy = (id, data) => vac.put(`/${id}`, data).then((r) => r.data)
 export const closeVacancy = (id) => vac.patch(`/${id}/close`).then((r) => r.data)
-export const getVacancies = (params) =>
-  vac.get('/', { params }).then((r) => ({ items: toList(r.data), raw: r.data }))
 
 // ---- Portfolio and applications ----
-const MOCK_PORTFOLIO = true // set to false when Rafay's endpoints are ready
-const MOCK_APPLY = true // same for applications
+const MOCK_PORTFOLIO = false // set to false when Rafay's endpoints are ready
+const MOCK_APPLY = false // same for applications
 
 const api = axios.create({ baseURL: 'http://localhost:5001/api' })
 api.interceptors.request.use((config) => {
@@ -168,3 +166,19 @@ export const applyToVacancy = async ({ vacancyId, note }) => {
   }
   return (await api.post('/applications', { vacancyId, note })).data
 }
+
+export const getVacancies = async () => {
+  let page = 1
+  let totalPages = 1
+  let items = []
+  do {
+    const { data } = await vac.get('/', { params: { page, limit: 50 } })
+    items = items.concat(toList(data))
+    totalPages = data.totalPages || 1
+    page += 1
+  } while (page <= totalPages)
+  return { items }
+}
+
+export const getApplicants = (vacancyId) =>
+  api.get(`/vacancies/${vacancyId}/applications`).then((r) => r.data.applications || [])
