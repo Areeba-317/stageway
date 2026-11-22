@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { sendOtpEmail } = require('./emailService');
 
 const OTP_TTL_MS = 5 * 60 * 1000;     // 5 minutes
 const MAX_ATTEMPTS = 5;
@@ -7,11 +8,6 @@ const RESEND_COOLDOWN_MS = 60 * 1000; // 1 minute
 const hashOtp = (otp) =>
      crypto.createHmac('sha256', process.env.JWT_SECRET).update(String(otp)).digest('hex');
 
-// For now this only logs. Swap in a real SMS provider later.
-async function sendOtp(phone, otp) {
-     console.log(`[OTP] ${phone} -> ${otp}`);
-}
-
 async function issueOtp(user) {
      const otp = String(crypto.randomInt(100000, 1000000)); // 6 digits
      user.otpHash = hashOtp(otp);
@@ -19,7 +15,7 @@ async function issueOtp(user) {
      user.otpAttempts = 0;
      user.otpLastSentAt = new Date();
      await user.save();
-     await sendOtp(user.phone, otp);
+     await sendOtpEmail(user.email, otp);
      return otp;
 }
 
