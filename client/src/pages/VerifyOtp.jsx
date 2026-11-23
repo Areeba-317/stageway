@@ -62,14 +62,14 @@ export default function VerifyOtp() {
     <AuthLayout
       headingLine1="Almost there."
       headingLine2="One quick check."
-      urdu="اپنا فون نمبر تصدیق کریں"
+      urdu="اپنا ای میل تصدیق کریں"
       bullets={['Keeps your account secure.', 'Takes less than a minute.']}
       headerLink={<Link to="/login">Log in</Link>}
     >
-      <h1 className="signup-title">Verify your phone</h1>
+      <h1 className="signup-title">Verify your email</h1>
       <p className="auth-sub">
-        We sent a 6-digit code to {state.phone || 'your phone'}.{' '}
-        <Link to="/signup">Change number</Link>
+        We sent a 6-digit code to {state.email || 'your email'}. Check your spam folder if you don't see it.{' '}
+        <Link to="/signup">Use a different email</Link>
       </p>
 
       <div className="auth-form">

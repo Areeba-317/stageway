@@ -65,7 +65,12 @@ export default function SignUp() {
         role: form.role,
       })
       navigate('/verify-otp', {
-        state: { userId: result.userId, phone: result.phone, devOtp: result.devOtp },
+        state: {
+        userId: result.userId,
+        phone: result.phone,
+        devOtp: result.devOtp,
+        email: form.email.trim().toLowerCase(),
+      },
       })
     } catch (err) {
       setServerError(err.response?.data?.message || 'Something went wrong. Please try again.')
@@ -124,6 +129,7 @@ export default function SignUp() {
           onChange={update('email')}
           onBlur={blur('email')}
           error={show('email')}
+          helper="We'll email you a verification code."
         />
 
         <Input
@@ -137,6 +143,7 @@ export default function SignUp() {
           onChange={update('phone')}
           onBlur={blur('phone')}
           error={show('phone')}
+          helper="Your contact number."
         />
 
         <PasswordInput

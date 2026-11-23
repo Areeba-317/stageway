@@ -41,7 +41,9 @@ export default function Login() {
     } catch (err) {
       const data = err.response?.data
       if (err.response?.status === 403 && data?.userId) {
-        navigate('/verify-otp', { state: { userId: data.userId } })
+        navigate('/verify-otp', {
+          state: { userId: data.userId, email: form.identifier.includes('@') ? form.identifier.trim() : '' },
+        })
         return
       }
       setServerError(data?.message || 'Something went wrong. Please try again.')
